@@ -22,7 +22,7 @@ import org.swissbib.slsp.NewFields
 import org.swissbib.ml.utilities.UtilityTypes._
 
 import scala.xml.transform.{RewriteRule, RuleTransformer}
-import scala.xml.{Elem, Node, NodeSeq, XML}
+import scala.xml.{Attribute, Elem, Node, NodeSeq, XML}
 
 
 trait MarcXmlHandlers {
@@ -55,6 +55,8 @@ trait MarcXmlHandlers {
       .get
       .text
   }
+
+
 
   /**
     * Gets Seq of control numbers as defined in Marc field 035$a
@@ -105,6 +107,9 @@ trait MarcXmlHandlers {
     (rootElem \\ "datafield").filter(df => df \@ "tag" == fieldName).head
 
 
+  protected def getNRControlfieldField(rootElem: Elem)(fieldName: String): Node =
+    (rootElem \\ "controlfield").filter(df => df \@ "tag" == fieldName).head
+
 
   /**
     * Gets content of a non-repeatable subfield
@@ -113,18 +118,30 @@ trait MarcXmlHandlers {
     * @param subfieldName subfield code
     * @return optional content
     */
-  protected def getNRSubfieldContent(field: Node)(subfieldName: String): Option[String] =
+  protected def getNRSubfieldContent(field: Node) (subfieldName: String): Option[String] =
     (field \\ "subfield").find(s => s \@ "code" == subfieldName) match {
       case Some(v) => Some(v.text)
       case _ => None
     }
 
-  protected def getRSubfieldContent(field: Node)(subfieldName: String): Option[String] =
-    (field \\ "subfield").filter(s => s \@ "code" == subfieldName).map( (v) =>  v match {
+  protected def f1(field: Node, subfieldName: String): Option[String] =
+    (field \\ "subfield").find(s => s \@ "code" == subfieldName) match {
       case Some(v) => Some(v.text)
       case _ => None
     }
 
+
+
+  protected def getRSubfieldContent(field: Node)(subfieldName: String): NodeSeq =
+    (field \\ "subfield").filter(s => s \@ "code" == subfieldName)
+
+  protected def getAllSubfieldContent(field: Node): NodeSeq =
+    (field \\ "subfield")
+
+
+
+  protected def getRSubfieldContent1(field: Node)(subfieldName: String): NodeSeq =
+    (field \\ "subfield").filter(s => s \@ "code" == subfieldName)
 
 
   /**

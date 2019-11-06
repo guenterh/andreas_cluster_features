@@ -29,7 +29,8 @@ trait Transformators extends MarcXmlHandlers {
     * @param record Potential record
     * @return true if XML record
     */
-  def isRecord(record: String): Boolean = record.startsWith("<record>")
+  def isRecord(record: String): Boolean =
+    record.startsWith("<record>")
 
   /**
     * Checks for existence of subfield 839##$w, which indicates a volume record

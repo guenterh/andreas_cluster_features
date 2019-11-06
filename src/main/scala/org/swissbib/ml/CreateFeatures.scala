@@ -1,82 +1,71 @@
 package org.swissbib.ml
 
-import java.io.File
-import java.nio.file._
-import java.util.stream
+import java.io.{BufferedWriter, File, FileWriter}
+import java.nio.file.{Files, Paths}
 import java.util.stream.Collectors
 
-import org.swissbib.ml.utilities._
+import org.swissbib.ml.utilities.{MarcXMLHandlersFeatures, Transformators}
+import play.api.libs.json.{JsObject, JsString, Json}
 
 import scala.io.Source
 import scala.xml.Elem
 
-class CreateFeatures(val args:Array[String]) extends Transformators  {
+class CreateFeatures (val args:Array[String]) extends Transformators
+                                                with MarcXMLHandlersFeatures {
+
+  val fileentries: java.util.List[String] = Files.walk(Paths.get(args(0))).
+    filter(Files.isRegularFile(_)).map[String](_.toString).collect(Collectors.toList[String])
+
+  def attributeValue(elem: Elem) = true
 
   def processFiles(): Unit = {
 
-    //val t = Paths.get(args(0))
-
-    val fileentries: java.util.List[String] = Files.walk(Paths.get(args(0))).
-      filter(Files.isRegularFile(_)).map[String](_.toString).collect(Collectors.toList[String])
-
-    def attributeValue(elem: Elem) = true
-
     try fileentries.forEach(p => {
 
-      val source = Source.fromFile(new File(p.toString))
-      val it = source.getLines()
-      for (line <- it if isRecord(line) ) {
-        val elem = parseRecord(line)
+          val infile = new File(p.toString)
+          val source = Source.fromFile(infile)
+          val name =  infile.getAbsoluteFile.getName.split("\\.")(0)
 
-        val rfield020_isbn = getRField(elem)("020").
-          map(node => (getNRSubfieldContent(node)("a")).get)
-        val rfield022_isbn = getRField(elem)("022").
-          map(node => (getNRSubfieldContent(node)("a")).get)
+          val outfile = new File("dataout/" + name + ".json")
+          val bw = new BufferedWriter(new FileWriter(outfile))
 
-        val rfield245a_ttlfull = getRField(elem)("245").
-          map(node => (getNRSubfieldContent(node)("a")).get)
+          val it = source.getLines()
+          for (line <- it if isRecord(line)) {
+            val elem = parseRecord(line)
 
 
-        val rfield245b_ttlfull = getRField(elem)("245").
-          map(node => (getNRSubfieldContent(node)("b")).get)
+            val jsonfeatures = JsObject (Seq (
+              "isbn" -> JsString (isbnFeatures(elem).mkString),
+              "ttlfull" -> Json.toJson(ttlFullFeature(elem)),
+              "ttlpart" -> Json.toJson( ttl245Feature(elem)),
+              "person" -> Json.toJson( personFeature(elem)),
+              "corporate" -> Json.toJson(corporateFeature(elem)),
+              "pubyear" -> JsString( partOf008Feature(elem)(7,14)),
+              "decade" -> JsString( partOf008Feature(elem)(7,10)),
+              "century" -> JsString(partOf008Feature(elem)(7,10)),
+              "exactDate" -> JsString( partOf008Feature(elem)(7,14)),
+              "edition" -> JsString( editionFeature(elem).mkString),
+              "part" -> Json.toJson( partFeature(elem)),
+              "pages" -> Json.toJson( partFeature(elem)),
+              "volumes" -> JsString( volumesFeature(elem).mkString),
+              "pubinit" -> JsString( pubFeature(elem).mkString),
+              "pubword" -> Json.toJson( pubFeature(elem)),
+              "scale" -> JsString( scaleFeature(elem).mkString),
+              "coordinate" -> Json.toJson( coordinateFeature(elem)),
+              "doi" -> JsString( doiFeature(elem).mkString),
+              "ismn" -> JsString( ismnFeature(elem).mkString),
+              "musicid" -> JsString( musicIdFeature(elem).mkString),
+              "format" -> JsString( formatFeature(elem).mkString)
+            ))
 
-        val rfield245p_n_ttlfull = getRField(elem)("245").
-          map(node => (getNRSubfieldContent(node)("p")).getOrElse(
-            getRField(elem)("245").
-              map(node => (getNRSubfieldContent(node)("c")).get
-
-          )))
-
-
-        val isDefinded = (getNRSubfieldContent(getNRField(elem)("245"))("b")).isDefined
-
-
-
-
-        val isbn1 =  getNRSubfieldContent(elem)("a")
-
-        val rf = getRField(elem) ("035" )
-        val id = getField001Content(elem)
-        val content_035 = getField035Contents(elem)
-
-        val test = elem.toString()
-        //val e_008 = elem \ "<record>" \ "<controlfield" filter {
-        val e_008 = elem  \\ "record" \\ "controlfield" filter {
-          n => {
-            val t = n
-            val att = t.attribute("tag")
-            println(t)
-            true
-          }
+            //println(jsonfeatures.toString())
+            bw.write(jsonfeatures.toString())
+            bw.write("\n")
         }
-
-        println("test")
+        bw.flush()
+        bw.close()
 
       }
-
-    })
-
-
+    )
   }
-
 }
