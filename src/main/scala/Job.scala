@@ -1,4 +1,4 @@
-import org.swissbib.ml.{CreateFeatures, CreateFeaturesOld, Testclass}
+import org.swissbib.ml.{CreateFeatures}
 
 
 object Job extends App {
