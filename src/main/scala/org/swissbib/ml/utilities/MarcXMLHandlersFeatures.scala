@@ -129,6 +129,14 @@ trait MarcXMLHandlersFeatures extends MarcXmlHandlers {
 
   }
 
+  def all35(elem: Elem): immutable.Seq[String] = {
+    //todo: make it better - should be able to collect all subfields at once
+    // then it would be a general function
+      (getRField(elem)("035").map(getRSubfieldContent(_)("a")) .flatten.
+        map(_.text))
+
+  }
+
 
   def all800(elem: Elem): immutable.Seq[String] = {
     //todo: make it better - should be able to collect all subfields at once
@@ -139,6 +147,12 @@ trait MarcXMLHandlersFeatures extends MarcXmlHandlers {
         (getRField(elem)("800").map(getRSubfieldContent(_)("c"))))).flatten.
         map(_.text)
     else Nil
+
+  }
+
+  def recordid(elem: Elem) (): String = {
+
+    getNRControlfieldField(elem)("001").text
 
   }
 

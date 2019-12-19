@@ -24,9 +24,9 @@ class CreateFeatures (val args:Array[String]) extends Transformators
 
           val infile = new File(p.toString)
           val source = Source.fromFile(infile)
-          val name =  infile.getAbsoluteFile.getName.split("\\.")(0)
+          val name =  infile.getAbsoluteFile.getName.split("\\.")(1)
 
-          val outfile = new File("dataout/" + name + ".json")
+          val outfile = new File("goldstandard/" + name + ".json")
           val bw = new BufferedWriter(new FileWriter(outfile))
 
           val it = source.getLines()
@@ -35,6 +35,8 @@ class CreateFeatures (val args:Array[String]) extends Transformators
 
 
             val jsonfeatures = JsObject (Seq (
+              "docid" -> JsString(recordid(elem)),
+              "035liste" -> Json.toJson(all35(elem)),
               "isbn" -> JsString (isbnFeatures(elem).mkString),
               "ttlfull" -> Json.toJson(ttlFullFeature(elem)),
               "ttlpart" -> Json.toJson( ttl245Feature(elem)),
