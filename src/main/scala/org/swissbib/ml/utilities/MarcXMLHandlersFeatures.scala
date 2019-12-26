@@ -1,6 +1,8 @@
 package org.swissbib.ml.utilities
 
-import scala.collection.immutable
+import org.w3c.dom.Node
+
+import scala.collection.{immutable, mutable}
 import scala.xml.{Elem, NodeSeq}
 
 trait MarcXMLHandlersFeatures extends MarcXmlHandlers {
@@ -46,15 +48,34 @@ trait MarcXMLHandlersFeatures extends MarcXmlHandlers {
 
   }
 
-  def personFeature(elem: Elem): immutable.Seq[String] = {
+  def personFeature(elem: Elem): mutable.Seq[Seq[String]] = {
 
     //all100(elem) ++ all700(elem) ++ all800(elem) ++
     //  (getRField(elem)("245").map(getRSubfieldContent(_)("c"))).map(_.text)
 
-    allGeneric(elem)( "100") ++ allGeneric(elem)("700") ++ allGeneric(elem)("800") ++
-      (getRField(elem)("245").map(getRSubfieldContent(_)("c"))).map(_.text)
+
+    //var s = mutable.Seq.empty[Seq[String]]
+    var t = mutable.Seq.empty[Seq[String]]
+    t :+ allGeneric(elem)( "100")
+
+    if (allGeneric(elem)("700").nonEmpty)
+      t = t :+ allGeneric(elem)("700")
+
+    if (allGeneric(elem)("800").nonEmpty)
+      t = t :+ allGeneric(elem)("800")
+
+    if (getRField(elem)("245").map(getRSubfieldContent(_)("c")).nonEmpty)
+      t = t :+  (getRField(elem)("245").map(getRSubfieldContent(_)("c"))).map(_.text)
 
 
+      //s :+ allGeneric(elem)( "100") :+ allGeneric(elem)("700") :+ allGeneric(elem)("800") :+
+      //(getRField(elem)("245").map(getRSubfieldContent(_)("c"))).map(_.text)
+
+    t
+    //allGeneric(elem)( "100") :+ allGeneric(elem)("700") :+ allGeneric(elem)("800") :+
+    //  (getRField(elem)("245").map(getRSubfieldContent(_)("c"))).map(_.text)
+
+    //s
 
   }
 
@@ -97,7 +118,7 @@ trait MarcXMLHandlersFeatures extends MarcXmlHandlers {
     //todo: make it better - should be able to collect all subfields at once
     // then it would be a general function
     if (getRField(elem)(datafield).nonEmpty)
-      (getRField(elem)(datafield).map(getAllSubfieldContent(_)).flatten.
+      (getRField(elem)(datafield).map(getAllSubfieldContent(_)).
         map(_.text))
     else Nil
 
@@ -160,7 +181,7 @@ trait MarcXMLHandlersFeatures extends MarcXmlHandlers {
   def partOf008Feature(elem: Elem) (start:Int, end: Int): String = {
 
     val text008 = getNRControlfieldField(elem)("008").text
-    (text008(start) to text008(end)).mkString
+    text008.slice(start,end + 1)
   }
 
   def editionFeature(elem: Elem): immutable.Seq[String] = {
@@ -231,14 +252,21 @@ trait MarcXMLHandlersFeatures extends MarcXmlHandlers {
 
   def _24a(elem: Elem): immutable.Seq[String] = {
 
-    ((getRField(elem)("024").map(getRSubfieldContent(_)("a")))).flatten.
-      map(_.text)
+    getRField(elem)("024").filter(p => (p \\ "subfield").exists(sf => sf \@ "code" == "2")).
+      map(getRSubfieldContent(_)("a")).flatten.map(_.text)
+    //val nr = getRField(elem)("024")
+    //((getRField(elem)("024").map(getRSubfieldContent(_)("a")))).flatten.
+    //  map(_.text)
 
   }
 
   def doiFeature(elem: Elem): immutable.Seq[String] = {
 
-    _24a(elem)
+    val t =_24a(elem)
+    //if (t.nonEmpty) {
+    //  println(t.head)
+    //}
+    t
 
   }
 
@@ -257,8 +285,10 @@ trait MarcXMLHandlersFeatures extends MarcXmlHandlers {
 
   def formatFeature(elem: Elem): immutable.Seq[String] = {
 
-    ((getRField(elem)("898").map(getRSubfieldContent(_)("a")))).flatten.
-      map(_.text)
+    //((getRField(elem)("898").map(getRSubfieldContent(_)("a")))).flatten.
+    //  map(_.text)
+    val t = getRField(elem)("898").map(getRSubfieldContent(_)("a")).flatten.map(_.text)
+    ((getRField(elem)("898").map(getRSubfieldContent(_)("a")).flatten.map(_.text)))
 
   }
 

@@ -33,11 +33,14 @@ class CreateFeatures (val args:Array[String]) extends Transformators
           for (line <- it if isRecord(line)) {
             val elem = parseRecord(line)
 
+            //if ( recordid(elem) == "504389122" )
+            //  println("stop")
+
 
             val jsonfeatures = JsObject (Seq (
               "docid" -> JsString(recordid(elem)),
               "035liste" -> Json.toJson(all35(elem)),
-              "isbn" -> JsString (isbnFeatures(elem).mkString),
+              "isbn" -> Json.toJson( isbnFeatures(elem)),
               "ttlfull" -> Json.toJson(ttlFullFeature(elem)),
               "ttlpart" -> Json.toJson( ttl245Feature(elem)),
               "person" -> Json.toJson( personFeature(elem)),
@@ -48,16 +51,16 @@ class CreateFeatures (val args:Array[String]) extends Transformators
               "exactDate" -> JsString( partOf008Feature(elem)(7,14)),
               "edition" -> JsString( editionFeature(elem).mkString),
               "part" -> Json.toJson( partFeature(elem)),
-              "pages" -> Json.toJson( partFeature(elem)),
-              "volumes" -> JsString( volumesFeature(elem).mkString),
-              "pubinit" -> JsString( pubFeature(elem).mkString),
+              "pages" -> Json.toJson( pagesFeature(elem)),
+              "volumes" -> Json.toJson( volumesFeature(elem)),
+              "pubinit" -> Json.toJson( pubFeature(elem)),
               "pubword" -> Json.toJson( pubFeature(elem)),
               "scale" -> JsString( scaleFeature(elem).mkString),
               "coordinate" -> Json.toJson( coordinateFeature(elem)),
-              "doi" -> JsString( doiFeature(elem).mkString),
-              "ismn" -> JsString( ismnFeature(elem).mkString),
+              "doi" -> Json.toJson( doiFeature(elem)),
+              "ismn" -> Json.toJson( ismnFeature(elem)),
               "musicid" -> JsString( musicIdFeature(elem).mkString),
-              "format" -> JsString( formatFeature(elem).mkString)
+              "format" -> Json.toJson( formatFeature(elem))
             ))
 
             //println(jsonfeatures.toString())
