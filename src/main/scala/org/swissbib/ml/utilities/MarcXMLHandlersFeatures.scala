@@ -287,7 +287,7 @@ trait MarcXMLHandlersFeatures extends MarcXmlHandlers {
 
     //((getRField(elem)("898").map(getRSubfieldContent(_)("a")))).flatten.
     //  map(_.text)
-    val t = getRField(elem)("898").map(getRSubfieldContent(_)("a")).flatten.map(_.text)
+    //val t = getRField(elem)("898").map(getRSubfieldContent(_)("a")).flatten.map(_.text)
     ((getRField(elem)("898").map(getRSubfieldContent(_)("a")).flatten.map(_.text)))
 
   }
