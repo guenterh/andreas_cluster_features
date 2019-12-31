@@ -15,57 +15,58 @@ trait MarcXMLHandlersFeatures extends MarcXmlHandlers {
 
   }
 
-  def ttl245Feature(elem: Elem): immutable.Seq[String] = {
+  def ttl245Feature(elem: Elem): immutable.Map[String,Seq[String]] = {
 
+      Map("245"->
       (((getRField(elem)("245").map(getRSubfieldContent(_)("a")) ++
         (getRField(elem)("245").map(getRSubfieldContent(_)("b")))) ++
         (if ((getRSubfieldContent(getNRField(elem)("245"))("p")).nonEmpty)
           (getRField(elem)("245").map(getRSubfieldContent(_)("p")))
         else
           (getRField(elem)("245").map(getRSubfieldContent(_)("n"))))).flatten.
-        map(_.text))
+        map(_.text)))
 
   }
 
-  def ttl246Feature(elem: Elem): immutable.Seq[String] = {
+  def ttl246Feature(elem: Elem): immutable.Map[String,Seq[String]] = {
 
     if (getRField(elem)("246").nonEmpty)
-      (((getRField(elem)("246").map(getRSubfieldContent(_)("a")) ++
+      Map("246" -> (((getRField(elem)("246").map(getRSubfieldContent(_)("a")) ++
         (getRField(elem)("246").map(getRSubfieldContent(_)("b")))) ++
         (if ((getRSubfieldContent(getNRField(elem)("246"))("p")).nonEmpty)
           (getRField(elem)("246").map(getRSubfieldContent(_)("p")))
         else
           (getRField(elem)("246").map(getRSubfieldContent(_)("n"))))).flatten.
-        map(_.text))
-    else Nil
+        map(_.text)))
+    else Map.empty
 
   }
 
 
-  def ttlFullFeature(elem: Elem): immutable.Seq[String] = {
+  def ttlFullFeature(elem: Elem): immutable.Map[String,Seq[String]] = {
 
       ttl245Feature(elem) ++ ttl246Feature(elem)
 
   }
 
-  def personFeature(elem: Elem): mutable.Seq[Seq[String]] = {
+  def personFeature(elem: Elem): Map[String, immutable.Seq[String]] = {
 
     //all100(elem) ++ all700(elem) ++ all800(elem) ++
     //  (getRField(elem)("245").map(getRSubfieldContent(_)("c"))).map(_.text)
 
 
     //var s = mutable.Seq.empty[Seq[String]]
-    var t = mutable.Seq.empty[Seq[String]]
-    t :+ allGeneric(elem)( "100")
+    //var t = mutable.Map[String,Seq[String]]
+    var t: Map[String, immutable.Seq[String]] = Map("100" -> allGeneric(elem)( "100"))
 
     if (allGeneric(elem)("700").nonEmpty)
-      t = t :+ allGeneric(elem)("700")
+      t += ("700" -> allGeneric(elem)("700"))
 
     if (allGeneric(elem)("800").nonEmpty)
-      t = t :+ allGeneric(elem)("800")
+      t +=  ("800" -> allGeneric(elem)("800"))
 
     if (getRField(elem)("245").map(getRSubfieldContent(_)("c")).nonEmpty)
-      t = t :+  (getRField(elem)("245").map(getRSubfieldContent(_)("c"))).map(_.text)
+      t +=   ("245c" -> (getRField(elem)("245").map(getRSubfieldContent(_)("c"))).map(_.text))
 
 
       //s :+ allGeneric(elem)( "100") :+ allGeneric(elem)("700") :+ allGeneric(elem)("800") :+
@@ -124,28 +125,32 @@ trait MarcXMLHandlersFeatures extends MarcXmlHandlers {
 
   }
 
-  def corporateFeature(elem: Elem): immutable.Seq[String] = {
-    val _110 = if (getRField(elem)("110").nonEmpty)
-      ((getRField(elem)("110").map(getRSubfieldContent(_)("a")) ++
+  def corporateFeature(elem: Elem): Map[String, immutable.Seq[String]] = {
+
+    //var all = Map.empty[String, immutable.Seq[String]]
+
+    var all: Map[String, immutable.Seq[String]] = if (getRField(elem)("110").nonEmpty)
+       Map("110" -> ((getRField(elem)("110").map(getRSubfieldContent(_)("a")) ++
         (getRField(elem)("110").map(getRSubfieldContent(_)("b")))) ++
         (getRField(elem)("110").map(getRSubfieldContent(_)("c")))).flatten.
-        map(_.text)
-      else Nil
-    val _710 = if (getRField(elem)("710").nonEmpty)
-      ((getRField(elem)("710").map(getRSubfieldContent(_)("a")) ++
+        map(_.text))
+      else Map.empty[String, immutable.Seq[String]]
+     if (getRField(elem)("710").nonEmpty)
+      all += ("710" -> ((getRField(elem)("710").map(getRSubfieldContent(_)("a")) ++
         (getRField(elem)("710").map(getRSubfieldContent(_)("b")))) ++
         (getRField(elem)("710").map(getRSubfieldContent(_)("c")))).flatten.
-        map(_.text)
-    else Nil
+        map(_.text))
+    //else Map.empty[String, immutable.Seq[String]]
 
-    val _810 = if (getRField(elem)("810").nonEmpty)
-      ((getRField(elem)("810").map(getRSubfieldContent(_)("a")) ++
+    if (getRField(elem)("810").nonEmpty)
+      all += ("810" -> ((getRField(elem)("810").map(getRSubfieldContent(_)("a")) ++
         (getRField(elem)("810").map(getRSubfieldContent(_)("b")))) ++
         (getRField(elem)("810").map(getRSubfieldContent(_)("c")))).flatten.
-        map(_.text)
-    else Nil
+        map(_.text))
 
-    _110 ++ _710 ++ _810
+
+    all
+    //_110 ++ _710 ++ _810
 
 
   }
