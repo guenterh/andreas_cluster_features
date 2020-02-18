@@ -51,33 +51,15 @@ trait MarcXMLHandlersFeatures extends MarcXmlHandlers {
 
   def personFeature(elem: Elem): Map[String, immutable.Seq[String]] = {
 
-    //all100(elem) ++ all700(elem) ++ all800(elem) ++
-    //  (getRField(elem)("245").map(getRSubfieldContent(_)("c"))).map(_.text)
-
-
-    //var s = mutable.Seq.empty[Seq[String]]
-    //var t = mutable.Map[String,Seq[String]]
-    var t: Map[String, immutable.Seq[String]] = Map("100" -> allGeneric(elem)( "100"))
-
-    if (allGeneric(elem)("700").nonEmpty)
-      t += ("700" -> allGeneric(elem)("700"))
-
-    if (allGeneric(elem)("800").nonEmpty)
-      t +=  ("800" -> allGeneric(elem)("800"))
-
-    if (getRField(elem)("245").map(getRSubfieldContent(_)("c")).nonEmpty)
-      t +=   ("245c" -> (getRField(elem)("245").map(getRSubfieldContent(_)("c"))).map(_.text))
-
-
-      //s :+ allGeneric(elem)( "100") :+ allGeneric(elem)("700") :+ allGeneric(elem)("800") :+
-      //(getRField(elem)("245").map(getRSubfieldContent(_)("c"))).map(_.text)
-
-    t
-    //allGeneric(elem)( "100") :+ allGeneric(elem)("700") :+ allGeneric(elem)("800") :+
-    //  (getRField(elem)("245").map(getRSubfieldContent(_)("c"))).map(_.text)
-
-    //s
-
+    Map("100" -> (for (elem <- (getRField(elem)("100")))
+      yield elem.\\("subfield").filter(a =>  List("a","D", "q").contains(a \@ "code")).map(_.text).mkString("")),
+      "700" -> (for (elem <- (getRField(elem)("700")))
+        yield elem.\\("subfield").filter(a =>  List("a","D", "q").contains(a \@ "code")).map(_.text).mkString("")),
+      "800" -> (for (elem <- (getRField(elem)("800")))
+        yield elem.\\("subfield").filter(a =>  List("a","c","q").contains(a \@ "code")).map(_.text).mkString("")),
+      "245c" -> (for (elem <- (getRField(elem)("245")))
+        yield elem.\\("subfield").filter(a =>  List("c").contains(a \@ "code")).map(_.text).mkString(""))
+    )
   }
 
 
@@ -127,31 +109,13 @@ trait MarcXMLHandlersFeatures extends MarcXmlHandlers {
 
   def corporateFeature(elem: Elem): Map[String, immutable.Seq[String]] = {
 
-    //var all = Map.empty[String, immutable.Seq[String]]
-
-    var all: Map[String, immutable.Seq[String]] = if (getRField(elem)("110").nonEmpty)
-       Map("110" -> ((getRField(elem)("110").map(getRSubfieldContent(_)("a")) ++
-        (getRField(elem)("110").map(getRSubfieldContent(_)("b")))) ++
-        (getRField(elem)("110").map(getRSubfieldContent(_)("c")))).flatten.
-        map(_.text))
-      else Map.empty[String, immutable.Seq[String]]
-     if (getRField(elem)("710").nonEmpty)
-      all += ("710" -> ((getRField(elem)("710").map(getRSubfieldContent(_)("a")) ++
-        (getRField(elem)("710").map(getRSubfieldContent(_)("b")))) ++
-        (getRField(elem)("710").map(getRSubfieldContent(_)("c")))).flatten.
-        map(_.text))
-    //else Map.empty[String, immutable.Seq[String]]
-
-    if (getRField(elem)("810").nonEmpty)
-      all += ("810" -> ((getRField(elem)("810").map(getRSubfieldContent(_)("a")) ++
-        (getRField(elem)("810").map(getRSubfieldContent(_)("b")))) ++
-        (getRField(elem)("810").map(getRSubfieldContent(_)("c")))).flatten.
-        map(_.text))
-
-
-    all
-    //_110 ++ _710 ++ _810
-
+    Map("110" -> (for (elem <- (getRField(elem)("110")))
+      yield elem.\\("subfield").filter(a =>  List("a","b", "c").contains(a \@ "code")).map(_.text).mkString("")),
+      "710" -> (for (elem <- (getRField(elem)("710")))
+        yield elem.\\("subfield").filter(a =>  List("a","b", "c").contains(a \@ "code")).map(_.text).mkString("")),
+      "810" -> (for (elem <- (getRField(elem)("810")))
+        yield elem.\\("subfield").filter(a =>  List("a","b", "c").contains(a \@ "code")).map(_.text).mkString("")),
+    )
 
   }
 
