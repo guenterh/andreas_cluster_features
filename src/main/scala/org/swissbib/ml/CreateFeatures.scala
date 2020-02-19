@@ -24,11 +24,11 @@ class CreateFeatures (val args:Array[String]) extends Transformators
 
           val infile = new File(p.toString)
           val source = Source.fromFile(infile)
-          //val name =  infile.getAbsoluteFile.getName.split("\\.")(1)
-          val name =  infile.getAbsoluteFile.getName.split("\\.")(0)
+          val name =  infile.getAbsoluteFile.getName.split("\\.")(1)
+          //val name =  infile.getAbsoluteFile.getName.split("\\.")(0)
 
-          //val outfile = new File("goldstandard/" + name + ".json")
-          val outfile = new File("cbsoutput/" + name + ".json")
+          val outfile = new File("goldstandard.out.20200219/" + name + ".json")
+          //val outfile = new File("cbsoutput/" + name + ".json")
           val bw = new BufferedWriter(new FileWriter(outfile))
 
           val it = source.getLines()

@@ -231,18 +231,24 @@ trait MarcXMLHandlersFeatures extends MarcXmlHandlers {
 
   def doiFeature(elem: Elem): immutable.Seq[String] = {
 
-    val t =_24a(elem)
-    //if (t.nonEmpty) {
-    //  println(t.head)
-    //}
-    t
+    getRField(elem)("024").filter(data => (data \@ "ind1" == "7" )).
+      filter( data =>
+      {
+        (getNRSubfieldContent(data)("2"))
+        match {
+          case Some(v)  if v == "doi" => true
+          case _ => false
+        }
+      }
+      ).
+      map(getRSubfieldContent(_)("a")).flatten.map(_.text)
 
   }
 
   def ismnFeature(elem: Elem): immutable.Seq[String] = {
 
-    _24a(elem)
-
+    getRField(elem)("024").filter(data => (data \@ "ind1" == "2" )).
+      map(getRSubfieldContent(_)("a")).flatten.map(_.text)
   }
 
   def musicIdFeature(elem: Elem): immutable.Seq[String] = {
