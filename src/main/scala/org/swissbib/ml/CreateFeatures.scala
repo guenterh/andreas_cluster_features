@@ -1,19 +1,22 @@
 package org.swissbib.ml
 
-import java.io.{BufferedWriter, File, FileWriter}
+import java.io.{BufferedWriter, File, FileInputStream, FileWriter, InputStream}
 import java.nio.file.{Files, Paths}
+import java.util.Optional
 import java.util.stream.Collectors
+import java.util.zip.GZIPInputStream
 
-import org.swissbib.ml.utilities.{MarcXMLHandlersFeatures, Transformators}
+import org.swissbib.ml.utilities.{FetchSRU, FetchSRUJava, MarcXMLHandlersFeatures, Transformators}
 import play.api.libs.json.{JsObject, JsString, Json}
 
 import scala.io.Source
-import scala.xml.Elem
+import scala.xml.{Elem, NodeSeq}
 
-class CreateFeatures (val args:Array[String]) extends Transformators
+class CreateFeatures (val args: Map[Symbol, Any]) extends Transformators
                                                 with MarcXMLHandlersFeatures {
 
-  val fileentries: java.util.List[String] = Files.walk(Paths.get(args(0))).
+
+  val fileentries: java.util.List[String] = Files.walk(Paths.get(args(Symbol("indir")).asInstanceOf[String])).
     filter(Files.isRegularFile(_)).map[String](_.toString).collect(Collectors.toList[String])
 
   def attributeValue(elem: Elem) = true
@@ -23,21 +26,44 @@ class CreateFeatures (val args:Array[String]) extends Transformators
     try fileentries.forEach(p => {
 
           val infile = new File(p.toString)
-          val source = Source.fromFile(infile)
-          val name =  infile.getAbsoluteFile.getName.split("\\.")(1)
+          //var source:InputStream
+          //val name =  infile.getAbsoluteFile.getName.split("\\.")(1)
           //val name =  infile.getAbsoluteFile.getName.split("\\.")(0)
+          //val name =  infile.getAbsoluteFile.getName.split("\\.")(1)
 
-          val outfile = new File("goldstandard.out.20200219/" + name + ".json")
+
+
+          val nameInFile: String =  infile.getAbsoluteFile.getName
+          val zipped = if (nameInFile.matches(""".*?.gz$""")) true else false
+          val  source: InputStream = if (zipped) {
+            new GZIPInputStream(new FileInputStream(infile))
+          } else {
+            new FileInputStream(infile)
+          }
+          val outdir = args(Symbol("outdir")).asInstanceOf[String]
+          val outf =  if (zipped) {
+            """(.*?)\.xml.gz$""".r.findFirstMatchIn(nameInFile) match {
+              case Some(g) => g.group(1) + ".json"
+              case None => "defaultname.zipped.json"
+            }
+
+          } else {
+            """(.*?)\.xml$""".r.findFirstMatchIn(nameInFile) match {
+              case Some(g) => g.group(1) + ".json"
+              case None => "defaultname.json"
+            }
+          }
+          //val outfile = new File("goldstandard.scale/" + name + ".json")
           //val outfile = new File("cbsoutput/" + name + ".json")
-          val bw = new BufferedWriter(new FileWriter(outfile))
+          val bw = new BufferedWriter(new FileWriter(outdir + File.separator + outf))
 
-          val it = source.getLines()
+          val it = Source.fromInputStream(source).getLines()
           for (line <- it if isRecord(line)) {
             val elem = parseRecord(line)
+            //println(elem)
 
             //if ( recordid(elem) == "504389122" )
             //  println("stop")
-
 
             val jsonfeatures = JsObject (Seq (
               "docid" -> JsString(recordid(elem)),
@@ -64,6 +90,8 @@ class CreateFeatures (val args:Array[String]) extends Transformators
               "musicid" -> JsString( musicIdFeature(elem).mkString),
               "format" -> Json.toJson( formatFeature(elem))
             ))
+
+
 
             //println(jsonfeatures.toString())
             bw.write(jsonfeatures.toString())

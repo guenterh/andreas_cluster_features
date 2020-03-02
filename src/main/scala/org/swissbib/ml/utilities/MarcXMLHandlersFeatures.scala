@@ -128,6 +128,16 @@ trait MarcXMLHandlersFeatures extends MarcXmlHandlers {
   }
 
 
+  def allRelevantSlave35(elem: Elem): immutable.Seq[String] = {
+    //todo: make it better - should be able to collect all subfields at once
+    // then it would be a general function
+    (getRField(elem)("035").map(getRSubfieldContent(_)("a")) .flatten.
+      filter(!_.text.contains("(OCoLC)"))
+      map(_.text))
+
+  }
+
+
   def all800(elem: Elem): immutable.Seq[String] = {
     //todo: make it better - should be able to collect all subfields at once
     // then it would be a general function
@@ -201,11 +211,15 @@ trait MarcXMLHandlersFeatures extends MarcXmlHandlers {
 
     (getRField(elem)("034").map(getRSubfieldContent(_)("b")) match {
 
-      case Nil => (getRField(elem)("255").map(getRSubfieldContent(_)
+      case Nil =>
+        println(elem)
+        (getRField(elem)("255").map(getRSubfieldContent(_)
                                     ("a")).map(_.text))
 
         //we have found something for 034$b
-      case seq => seq.map(_.text)
+      case seq =>
+        println(elem)
+        seq.map(_.text)
 
     })
 

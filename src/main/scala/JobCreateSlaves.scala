@@ -1,8 +1,8 @@
-import org.swissbib.ml.CreateFeatures
+
+import org.swissbib.ml.CreateSlaves
 import org.swissbib.ml.utilities.OptionsParser
 
-
-object Job extends App {
+object JobCreateSlaves extends App {
 
 
   val usage = """
@@ -20,7 +20,8 @@ object Job extends App {
   }
   println(options)
 
-  val features = new CreateFeatures(options)
-  features.processFiles()
+  val createSlaves = new CreateSlaves(options)
+
+  createSlaves.processFiles()
 
 }
