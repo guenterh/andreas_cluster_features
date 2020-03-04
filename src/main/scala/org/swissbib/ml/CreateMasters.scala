@@ -10,7 +10,7 @@ import org.swissbib.ml.utilities.{FetchSRUJava, MarcXMLHandlersFeatures, Transfo
 
 import scala.io.Source
 
-class CreateSlaves(val args: Map[Symbol, Any]) extends Transformators
+class CreateMasters(val args: Map[Symbol, Any]) extends Transformators
                                     with MarcXMLHandlersFeatures  {
 
 
@@ -51,11 +51,13 @@ class CreateSlaves(val args: Map[Symbol, Any]) extends Transformators
       val masterRecordsInFile = new BufferedWriter(new FileWriter(outdir + File.separator + outf + ".master.xml"))
       val it = Source.fromInputStream(source).getLines()
 
-      for (line <- it if isRecord(line)) {
+      var counter = 0
+      for (line <- it) if (counter <=  50 && isRecord(line)) {
+        counter += 1
         val elem = parseRecord(line)
 
         val all35SlaveFields = allRelevantSlave35(elem)
-        if (all35SlaveFields.size == 1) {
+        if (all35SlaveFields.nonEmpty ) {
           val elem: String = all35SlaveFields.head.replace("(", "").replace(")", "")
 
           val body: Optional[String] = new FetchSRUJava(elem).fetch()
@@ -84,7 +86,7 @@ class CreateSlaves(val args: Map[Symbol, Any]) extends Transformators
             }
 
           }
-          println()
+          //println()
         }
 
 
@@ -97,7 +99,7 @@ class CreateSlaves(val args: Map[Symbol, Any]) extends Transformators
     val outdir = args(Symbol("outdir")).asInstanceOf[String]
     val slaveIdsFile = new BufferedWriter(new FileWriter(outdir + File.separator + "slaveIDs" + ".txt"))
     for (slaveId <- mySlavesSet) {
-      slaveIdsFile.write(slaveId)
+      slaveIdsFile.write(slaveId + System.lineSeparator() )
       slaveIdsFile.flush()
     }
     slaveIdsFile.flush()

@@ -7,6 +7,8 @@ import scala.xml.{Elem, NodeSeq}
 
 trait MarcXMLHandlersFeatures extends MarcXmlHandlers {
 
+  private val isAcceptedSourceId = """^\(.*?\)""".r
+
   def isbnFeatures(elem: Elem): immutable.Seq[String] = {
 
     (getRField(elem)("020").map(getRSubfieldContent(_)("a")) ++
@@ -131,12 +133,29 @@ trait MarcXMLHandlersFeatures extends MarcXmlHandlers {
   def allRelevantSlave35(elem: Elem): immutable.Seq[String] = {
     //todo: make it better - should be able to collect all subfields at once
     // then it would be a general function
+
+
     (getRField(elem)("035").map(getRSubfieldContent(_)("a")) .flatten.
-      filter(!_.text.contains("(OCoLC)"))
-      map(_.text))
+      filter(value => !value.text.contains("(OCoLC)") &&
+        isAcceptedSourceId.findFirstIn(value.text).isDefined &&
+        !value.text.contains("Sz"))
+      .map(_.text))
 
   }
 
+  def firstRelevantSlave35(elem: Elem): Option[String] = {
+    //todo: make it better - should be able to collect all subfields at once
+    // then it would be a general function
+
+    val isSourceId = """^\(.*?\)""".r
+    (getRField(elem)("035").map(getRSubfieldContent(_)("a")) .flatten.
+      filter(value => !value.text.contains("(OCoLC)") &&  isSourceId.findFirstIn(value.text).isDefined)
+      .map(_.text)) match  {
+      case h :: _ => Some(h)
+      case _ => None
+    }
+
+  }
 
   def all800(elem: Elem): immutable.Seq[String] = {
     //todo: make it better - should be able to collect all subfields at once
