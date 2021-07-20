@@ -13,9 +13,10 @@ ThisBuild / resolvers ++= Seq(
 )
 
 val dependencies = Seq(
-  "org.scala-lang.modules" %% "scala-xml" % "1.2.0",
+  // https://mvnrepository.com/artifact/org.scala-lang.modules/scala-xml
+  "org.scala-lang.modules" %% "scala-xml" % "1.3.0",
   "org.swissbib.slsp" % "marcxml-fields" % "0.5.2",
-  "com.typesafe.play" %% "play-json" % "2.7.3",
+  "com.typesafe.play" %% "play-json" % "2.8.1",
   "org.scalatest" %% "scalatest" % "3.0.8" % Test,
    "com.softwaremill.sttp.client" %% "core" % "2.0.1",
   "org.apache.httpcomponents" % "httpclient" % "4.5.11"

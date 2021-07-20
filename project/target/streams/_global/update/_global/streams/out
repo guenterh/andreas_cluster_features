@@ -1,0 +1,4 @@
+[debug] "not up to date. inChanged = true, force = false
+[debug] Updating ProjectRef(uri("file:/home/swissbib/environment/code/learning/gh_scala/andreas_cluster_features/project/"), "andreas_cluster_features-build")...
+[debug] Done updating ProjectRef(uri("file:/home/swissbib/environment/code/learning/gh_scala/andreas_cluster_features/project/"), "andreas_cluster_features-build")
+[warn] There may be incompatibilities among your library dependencies; run 'evicted' to see detailed eviction warnings.
