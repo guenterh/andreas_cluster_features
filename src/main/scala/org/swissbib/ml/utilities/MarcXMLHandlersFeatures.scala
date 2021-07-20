@@ -169,7 +169,7 @@ trait MarcXMLHandlersFeatures extends MarcXmlHandlers {
 
   }
 
-  def recordid(elem: Elem) (): String = {
+  def recordid(elem: Elem): String = {
 
     getNRControlfieldField(elem)("001").text
 
