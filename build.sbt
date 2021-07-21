@@ -27,7 +27,21 @@ val dependencies = Seq(
 
 lazy val root = (project in file("."))
   .settings(
-    libraryDependencies ++= dependencies
+    libraryDependencies ++= dependencies,
+
+    assemblyMergeStrategy in assembly := {
+      case "log4j.properties" => MergeStrategy.first
+      case "log4j2.xml" => MergeStrategy.first
+      case "module-info.class" => MergeStrategy.discard
+      //https://stackoverflow.com/questions/54625572/sbt-assembly-errordeduplicate-different-file-contents-found-in-io-netty-versio
+      //todo: study the mechanisms!
+      case "META-INF/io.netty.versions.properties" => MergeStrategy.concat
+      case x =>
+        val oldStrategy = (assemblyMergeStrategy in assembly).value
+        oldStrategy(x)
+    },
+    mainClass in assembly := Some("ch.swisscollections.Main")
+
   )
 
 //assembly / mainClass := Some("org.swissbib.slsp.Job")
